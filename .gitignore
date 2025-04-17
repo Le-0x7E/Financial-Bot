@@ -1,0 +1,8 @@
+.idea
+__pycache__/
+运行结果/
+img/logo.ico
+test.py
+test.ipynb
+info.xlsx
+run.log
