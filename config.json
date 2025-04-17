@@ -1,0 +1,13 @@
+{
+    "Author": "BeileLiu",
+    "excel_path": "./info.xlsx",
+    "result_dir": "./\u8fd0\u884c\u7ed3\u679c",
+    "v_code_method": "\u5fae\u4fe1",
+    "etax_home_ps": 1,
+    "etax_item_ps": 1,
+    "invoice_inquiry_ps": 1,
+    "task_window_setting": 1,
+    "declare_record_ps": 1,
+    "gen_result": 1,
+    "status_bar_setting": 1
+}
