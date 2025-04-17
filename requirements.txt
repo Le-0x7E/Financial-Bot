@@ -1,6 +1,5 @@
 PyAutoGUI==0.9.54
 selenium==4.27.1
-opencv-python==4.11.0.86
 colorama==0.4.6
 numpy==1.24.4
 pandas==2.0.3
@@ -8,7 +7,5 @@ openpyxl==3.1.5
 pywin32
 pygetwindow==0.0.9
 pynput==1.7.8
-paddleocr==2.9.1
 pyperclip==1.9.0
-easyocr==1.7.2
-pillow==10.4.0
+keyboard==0.13.5
