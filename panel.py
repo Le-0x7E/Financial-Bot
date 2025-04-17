@@ -1,0 +1,460 @@
+from tkinter import Tk, Label, Entry, Button, Text, StringVar, filedialog
+import tkinter.ttk as ttk
+from common import *
+import config
+import threading
+
+
+class Panel:
+    def __init__(self, root=None):
+        # Panel主体设置
+        root.geometry("360x285+745+374")
+        root.minsize(120, 1)
+        root.maxsize(1924, 1061)
+        root.resizable(1, 1)
+        root.title("税务申报机器人")
+        root.configure(background="#d9d9d9")
+        root.configure(highlightbackground="#d9d9d9")
+        root.configure(highlightcolor="#000000")
+        root.protocol("WM_DELETE_WINDOW", self.on_closing)   # 监听窗口关闭事件
+
+        # 计算窗口位置并移动到屏幕中心
+        root.update_idletasks()   # 更新窗口的几何信息
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        window_width = root.winfo_width()
+        window_height = root.winfo_height()
+        x = (screen_width // 2) - (window_width // 2)
+        y = (screen_height // 2) - (window_height // 2)
+        root.geometry(f"+{x}+{y}")   # 移动窗口到屏幕中心
+
+        # Panel变量
+        self.root = root
+        self.v_code_method = tk.StringVar(value=config.config["v_code_method"])
+        self.etax_home_ps = tk.IntVar(value=config.config["etax_home_ps"])
+        self.etax_item_ps = tk.IntVar(value=config.config["etax_item_ps"])
+        self.invoice_inquiry_ps = tk.IntVar(value=config.config["invoice_inquiry_ps"])
+        self.task_window_setting = tk.IntVar(value=config.config["task_window_setting"])
+        self.declare_record_ps = tk.IntVar(value=config.config["declare_record_ps"])
+        self.gen_result = tk.IntVar(value=config.config["gen_result"])
+        self.status_bar_setting = tk.IntVar(value=config.config["status_bar_setting"])
+        self.excel_path = tk.StringVar(value=config.config["excel_path"])
+        self.result_dir = tk.StringVar(value=config.config["result_dir"])
+
+        # Panel组件
+        self.top_message = tk.Message(self.root)
+        self.top_message.place(relx=0.0, rely=0.021, relheight=0.074, relwidth=1.0)
+        self.top_message.configure(background="#d9d9d9")
+        self.top_message.configure(font="-family {Microsoft YaHei UI} -size 9")
+        self.top_message.configure(foreground="#000000")
+        self.top_message.configure(highlightbackground="#d9d9d9")
+        self.top_message.configure(highlightcolor="#000000")
+        self.top_message.configure(padx="1")
+        self.top_message.configure(pady="1")
+        self.top_message.configure(text='''欢 迎 使 用！''')
+        self.top_message.configure(width=360)
+
+        self.tab_box = ttk.Notebook(self.root)
+        self.tab_box.place(relx=0.0, rely=0.105, relheight=0.916, relwidth=1.014)
+
+        self.etax_tab = tk.Frame(self.tab_box)
+        self.tab_box.add(self.etax_tab, padding=3)
+        self.tab_box.tab(0, text='''      电 局 申 报      ''', compound="left", underline='''-1''', )
+        self.etax_tab.configure(background="#d9d9d9")
+        self.etax_tab.configure(highlightbackground="#d9d9d9")
+        self.etax_tab.configure(highlightcolor="#000000")
+        self.ptax_tab = tk.Frame(self.tab_box)
+        self.tab_box.add(self.ptax_tab, padding=3)
+        self.tab_box.tab(1, text='''      个 税 申 报      ''', compound="left", underline='''-1''', )
+        self.ptax_tab.configure(background="#d9d9d9")
+        self.ptax_tab.configure(highlightbackground="#d9d9d9")
+        self.ptax_tab.configure(highlightcolor="#000000")
+        self.setting_tab = tk.Frame(self.tab_box)
+        self.tab_box.add(self.setting_tab, padding=3)
+        self.tab_box.tab(2, text='''      全 局 设 置      ''', compound="left", underline='''-1''', )
+        self.setting_tab.configure(background="#d9d9d9")
+        self.setting_tab.configure(highlightbackground="#d9d9d9")
+        self.setting_tab.configure(highlightcolor="#000000")
+
+        self.is_etax_home_ps = tk.Checkbutton(self.etax_tab)
+        self.is_etax_home_ps.place(relx=0.055, rely=0.609, relheight=0.115, relwidth=0.421)
+        self.is_etax_home_ps.configure(activebackground="#d9d9d9")
+        self.is_etax_home_ps.configure(activeforeground="black")
+        self.is_etax_home_ps.configure(anchor='w')
+        self.is_etax_home_ps.configure(background="#d9d9d9")
+        self.is_etax_home_ps.configure(compound='left')
+        self.is_etax_home_ps.configure(disabledforeground="#a3a3a3")
+        self.is_etax_home_ps.configure(font="-family {Microsoft YaHei UI} -size 9")
+        self.is_etax_home_ps.configure(foreground="#000000")
+        self.is_etax_home_ps.configure(highlightbackground="#d9d9d9")
+        self.is_etax_home_ps.configure(highlightcolor="#000000")
+        self.is_etax_home_ps.configure(justify='left')
+        self.is_etax_home_ps.configure(text='''保存申报完成主页截图''')
+        self.is_etax_home_ps.configure(variable=self.etax_home_ps)
+
+        self.is_gen_result_etax = tk.Checkbutton(self.etax_tab)
+        self.is_gen_result_etax.place(relx=0.523, rely=0.609, relheight=0.115, relwidth=0.421)
+        self.is_gen_result_etax.configure(activebackground="#d9d9d9")
+        self.is_gen_result_etax.configure(activeforeground="black")
+        self.is_gen_result_etax.configure(anchor='w')
+        self.is_gen_result_etax.configure(background="#d9d9d9")
+        self.is_gen_result_etax.configure(compound='left')
+        self.is_gen_result_etax.configure(disabledforeground="#a3a3a3")
+        self.is_gen_result_etax.configure(foreground="#000000")
+        self.is_gen_result_etax.configure(highlightbackground="#d9d9d9")
+        self.is_gen_result_etax.configure(highlightcolor="#000000")
+        self.is_gen_result_etax.configure(justify='left')
+        self.is_gen_result_etax.configure(text='''运行结束生成运行报告''')
+        self.is_gen_result_etax.configure(variable=self.gen_result)
+
+        self.etax_text = tk.Text(self.etax_tab)
+        self.etax_text.place(relx=0.05, rely=0.085, relheight=0.391, relwidth=0.893)
+        self.etax_text.configure(background="white")
+        self.etax_text.configure(font="TkTextFont")
+        self.etax_text.configure(foreground="black")
+        self.etax_text.configure(highlightbackground="#d9d9d9")
+        self.etax_text.configure(highlightcolor="#000000")
+        self.etax_text.configure(insertbackground="#000000")
+        self.etax_text.configure(selectbackground="#d9d9d9")
+        self.etax_text.configure(selectforeground="black")
+        self.etax_text.configure(wrap="word")
+
+        self.etax_start_run_button = tk.Button(self.etax_tab)
+        self.etax_start_run_button.place(relx=0.579, rely=0.766, height=30, width=129)
+        self.etax_start_run_button.configure(activebackground="#d9d9d9")
+        self.etax_start_run_button.configure(activeforeground="black")
+        self.etax_start_run_button.configure(background="#d9d9d9")
+        self.etax_start_run_button.configure(disabledforeground="#a3a3a3")
+        self.etax_start_run_button.configure(font="-family {Microsoft YaHei UI} -size 9")
+        self.etax_start_run_button.configure(foreground="#000000")
+        self.etax_start_run_button.configure(highlightbackground="#d9d9d9")
+        self.etax_start_run_button.configure(highlightcolor="#000000")
+        self.etax_start_run_button.configure(text='''开 始 运 行''', command=lambda: self.start_task('etax'))
+
+        self.v_code_method_label = tk.Label(self.etax_tab)
+        self.v_code_method_label.place(relx=0.11, rely=0.711, height=23, width=137)
+        self.v_code_method_label.configure(activebackground="#d9d9d9")
+        self.v_code_method_label.configure(activeforeground="black")
+        self.v_code_method_label.configure(anchor='w')
+        self.v_code_method_label.configure(background="#d9d9d9")
+        self.v_code_method_label.configure(compound='left')
+        self.v_code_method_label.configure(disabledforeground="#a3a3a3")
+        self.v_code_method_label.configure(font="-family {Microsoft YaHei UI} -size 9")
+        self.v_code_method_label.configure(foreground="#000000")
+        self.v_code_method_label.configure(highlightbackground="#d9d9d9")
+        self.v_code_method_label.configure(highlightcolor="#000000")
+        self.v_code_method_label.configure(text='''登录验证码获取方式 ↓''')
+
+        self.v_code_method_combobox = ttk.Combobox(self.etax_tab)
+        self.v_code_method_combobox.place(relx=0.11, rely=0.809, relheight=0.089, relwidth=0.35)
+        self.value_list = ['微信', 'SIM卡(暂未开发)', ]
+        self.v_code_method_combobox.configure(values=self.value_list)
+        self.v_code_method_combobox.configure(font="-family {Microsoft YaHei UI} -size 9")
+        self.v_code_method_combobox.configure(textvariable=self.v_code_method)
+
+        self.is_etax_item_ps = tk.Checkbutton(self.etax_tab)
+        self.is_etax_item_ps.place(relx=0.523, rely=0.511, relheight=0.115, relwidth=0.421)
+        self.is_etax_item_ps.configure(activebackground="#d9d9d9")
+        self.is_etax_item_ps.configure(activeforeground="black")
+        self.is_etax_item_ps.configure(anchor='w')
+        self.is_etax_item_ps.configure(background="#d9d9d9")
+        self.is_etax_item_ps.configure(compound='left')
+        self.is_etax_item_ps.configure(disabledforeground="#a3a3a3")
+        self.is_etax_item_ps.configure(font="-family {Microsoft YaHei UI} -size 9")
+        self.is_etax_item_ps.configure(foreground="#000000")
+        self.is_etax_item_ps.configure(highlightbackground="#d9d9d9")
+        self.is_etax_item_ps.configure(highlightcolor="#000000")
+        self.is_etax_item_ps.configure(justify='left')
+        self.is_etax_item_ps.configure(text='''保存项目申报成功截图''')
+        self.is_etax_item_ps.configure(variable=self.etax_item_ps)
+
+        self.is_invoice_inquiry_ps = tk.Checkbutton(self.etax_tab)
+        self.is_invoice_inquiry_ps.place(relx=0.055, rely=0.511, relheight=0.115, relwidth=0.421)
+        self.is_invoice_inquiry_ps.configure(activebackground="#d9d9d9")
+        self.is_invoice_inquiry_ps.configure(activeforeground="black")
+        self.is_invoice_inquiry_ps.configure(anchor='w')
+        self.is_invoice_inquiry_ps.configure(background="#d9d9d9")
+        self.is_invoice_inquiry_ps.configure(compound='left')
+        self.is_invoice_inquiry_ps.configure(disabledforeground="#a3a3a3")
+        self.is_invoice_inquiry_ps.configure(font="-family {Microsoft YaHei UI} -size 9")
+        self.is_invoice_inquiry_ps.configure(foreground="#000000")
+        self.is_invoice_inquiry_ps.configure(highlightbackground="#d9d9d9")
+        self.is_invoice_inquiry_ps.configure(highlightcolor="#000000")
+        self.is_invoice_inquiry_ps.configure(justify='left')
+        self.is_invoice_inquiry_ps.configure(text='''保存全量发票查询截图''')
+        self.is_invoice_inquiry_ps.configure(variable=self.invoice_inquiry_ps)
+
+        self.ptax_text = tk.Text(self.ptax_tab)
+        self.ptax_text.place(relx=0.05, rely=0.085, relheight=0.391, relwidth=0.893)
+        self.ptax_text.configure(background="white")
+        self.ptax_text.configure(font="TkTextFont")
+        self.ptax_text.configure(foreground="black")
+        self.ptax_text.configure(highlightbackground="#d9d9d9")
+        self.ptax_text.configure(highlightcolor="#000000")
+        self.ptax_text.configure(insertbackground="#000000")
+        self.ptax_text.configure(selectbackground="#d9d9d9")
+        self.ptax_text.configure(selectforeground="black")
+        self.ptax_text.configure(wrap="word")
+
+        self.ptax_start_run_button = tk.Button(self.ptax_tab)
+        self.ptax_start_run_button.place(relx=0.579, rely=0.766, height=30, width=129)
+        self.ptax_start_run_button.configure(activebackground="#d9d9d9")
+        self.ptax_start_run_button.configure(activeforeground="black")
+        self.ptax_start_run_button.configure(background="#d9d9d9")
+        self.ptax_start_run_button.configure(disabledforeground="#a3a3a3")
+        self.ptax_start_run_button.configure(foreground="#000000")
+        self.ptax_start_run_button.configure(highlightbackground="#d9d9d9")
+        self.ptax_start_run_button.configure(highlightcolor="#000000")
+        self.ptax_start_run_button.configure(text='''开 始 运 行''', command=lambda: self.start_task('ptax'))
+
+        self.is_declare_record_ps = tk.Checkbutton(self.ptax_tab)
+        self.is_declare_record_ps.place(relx=0.055, rely=0.511, relheight=0.115, relwidth=0.421)
+        self.is_declare_record_ps.configure(activebackground="#d9d9d9")
+        self.is_declare_record_ps.configure(activeforeground="black")
+        self.is_declare_record_ps.configure(anchor='w')
+        self.is_declare_record_ps.configure(background="#d9d9d9")
+        self.is_declare_record_ps.configure(compound='left')
+        self.is_declare_record_ps.configure(disabledforeground="#a3a3a3")
+        self.is_declare_record_ps.configure(foreground="#000000")
+        self.is_declare_record_ps.configure(highlightbackground="#d9d9d9")
+        self.is_declare_record_ps.configure(highlightcolor="#000000")
+        self.is_declare_record_ps.configure(justify='left')
+        self.is_declare_record_ps.configure(text='''保存申报记录查询截图''')
+        self.is_declare_record_ps.configure(variable=self.declare_record_ps)
+
+        self.result_path_label = tk.Label(self.setting_tab)
+        self.result_path_label.place(relx=0.055, rely=0.311, height=25, width=137)
+        self.result_path_label.configure(activebackground="#d9d9d9")
+        self.result_path_label.configure(activeforeground="black")
+        self.result_path_label.configure(anchor='w')
+        self.result_path_label.configure(background="#d9d9d9")
+        self.result_path_label.configure(compound='left')
+        self.result_path_label.configure(disabledforeground="#a3a3a3")
+        self.result_path_label.configure(font="-family {Microsoft YaHei UI} -size 9")
+        self.result_path_label.configure(foreground="#000000")
+        self.result_path_label.configure(highlightbackground="#d9d9d9")
+        self.result_path_label.configure(highlightcolor="#000000")
+        self.result_path_label.configure(text='''运行结果保存路径 ↓''')
+
+        self.excel_path_label = tk.Label(self.setting_tab)
+        self.excel_path_label.place(relx=0.055, rely=0.047, height=25, width=147)
+
+        self.excel_path_label.configure(activebackground="#d9d9d9")
+        self.excel_path_label.configure(activeforeground="black")
+        self.excel_path_label.configure(anchor='w')
+        self.excel_path_label.configure(background="#d9d9d9")
+        self.excel_path_label.configure(compound='left')
+        self.excel_path_label.configure(disabledforeground="#a3a3a3")
+        self.excel_path_label.configure(font="-family {Microsoft YaHei UI} -size 9")
+        self.excel_path_label.configure(foreground="#000000")
+        self.excel_path_label.configure(highlightbackground="#d9d9d9")
+        self.excel_path_label.configure(highlightcolor="#000000")
+        self.excel_path_label.configure(text='''纳税人信息Exel文件路径 ↓''')
+
+        self.result_dir_select_button = tk.Button(self.setting_tab)
+        self.result_dir_select_button.place(relx=0.843, rely=0.421, height=28, width=30)
+        self.result_dir_select_button.configure(activebackground="#d9d9d9")
+        self.result_dir_select_button.configure(activeforeground="black")
+        self.result_dir_select_button.configure(background="#d9d9d9")
+        self.result_dir_select_button.configure(disabledforeground="#a3a3a3")
+        self.result_dir_select_button.configure(foreground="#000000")
+        self.result_dir_select_button.configure(highlightbackground="#d9d9d9")
+        self.result_dir_select_button.configure(highlightcolor="#000000")
+        self.result_dir_select_button.configure(text='''选择''', command=self.select_folder)
+
+        self.is_gen_result_setting = tk.Checkbutton(self.setting_tab)
+        self.is_gen_result_setting.place(relx=0.055, rely=0.766, relheight=0.123, relwidth=0.421)
+        self.is_gen_result_setting.configure(activebackground="#d9d9d9")
+        self.is_gen_result_setting.configure(activeforeground="black")
+        self.is_gen_result_setting.configure(anchor='w')
+        self.is_gen_result_setting.configure(background="#d9d9d9")
+        self.is_gen_result_setting.configure(compound='left')
+        self.is_gen_result_setting.configure(disabledforeground="#a3a3a3")
+        self.is_gen_result_setting.configure(font="-family {Microsoft YaHei UI} -size 9")
+        self.is_gen_result_setting.configure(foreground="#000000")
+        self.is_gen_result_setting.configure(highlightbackground="#d9d9d9")
+        self.is_gen_result_setting.configure(highlightcolor="#000000")
+        self.is_gen_result_setting.configure(justify='left')
+        self.is_gen_result_setting.configure(text='''运行结束生成运行报告''')
+        self.is_gen_result_setting.configure(variable=self.gen_result)
+
+        self.is_task_window_setting = tk.Checkbutton(self.setting_tab)
+        self.is_task_window_setting.place(relx=0.523, rely=0.638, relheight=0.123, relwidth=0.449)
+        self.is_task_window_setting.configure(activebackground="#d9d9d9")
+        self.is_task_window_setting.configure(activeforeground="black")
+        self.is_task_window_setting.configure(anchor='w')
+        self.is_task_window_setting.configure(background="#d9d9d9")
+        self.is_task_window_setting.configure(compound='left')
+        self.is_task_window_setting.configure(disabledforeground="#a3a3a3")
+        self.is_task_window_setting.configure(font="-family {Microsoft YaHei UI} -size 9")
+        self.is_task_window_setting.configure(foreground="#000000")
+        self.is_task_window_setting.configure(highlightbackground="#d9d9d9")
+        self.is_task_window_setting.configure(highlightcolor="#000000")
+        self.is_task_window_setting.configure(justify='left')
+        self.is_task_window_setting.configure(text='''开启任务进度显示窗口''')
+        self.is_task_window_setting.configure(variable=self.task_window_setting)
+
+        self.is_status_bar_setting = tk.Checkbutton(self.setting_tab)
+        self.is_status_bar_setting.place(relx=0.055, rely=0.638, relheight=0.123, relwidth=0.449)
+        self.is_status_bar_setting.configure(activebackground="#d9d9d9")
+        self.is_status_bar_setting.configure(activeforeground="black")
+        self.is_status_bar_setting.configure(anchor='w')
+        self.is_status_bar_setting.configure(background="#d9d9d9")
+        self.is_status_bar_setting.configure(compound='left')
+        self.is_status_bar_setting.configure(disabledforeground="#a3a3a3")
+        self.is_status_bar_setting.configure(font="-family {Microsoft YaHei UI} -size 9")
+        self.is_status_bar_setting.configure(foreground="#000000")
+        self.is_status_bar_setting.configure(highlightbackground="#d9d9d9")
+        self.is_status_bar_setting.configure(highlightcolor="#000000")
+        self.is_status_bar_setting.configure(justify='left')
+        self.is_status_bar_setting.configure(text='''开启实时状态显示横条''')
+        self.is_status_bar_setting.configure(variable=self.status_bar_setting)
+
+        self.result_path_entry = tk.Entry(self.setting_tab)
+        self.result_path_entry.place(relx=0.055, rely=0.426, height=27, relwidth=0.782)
+        self.result_path_entry.configure(background="white")
+        self.result_path_entry.configure(disabledforeground="#a3a3a3")
+        self.result_path_entry.configure(font="-family {新宋体} -size 10")
+        self.result_path_entry.configure(foreground="#000000")
+        self.result_path_entry.configure(highlightbackground="#d9d9d9")
+        self.result_path_entry.configure(highlightcolor="#000000")
+        self.result_path_entry.configure(insertbackground="#000000")
+        self.result_path_entry.configure(selectbackground="#d9d9d9")
+        self.result_path_entry.configure(selectforeground="black")
+        self.result_path_entry.configure(textvariable=self.result_dir)
+
+        self.excel_path_entry = tk.Entry(self.setting_tab)
+        self.excel_path_entry.place(relx=0.055, rely=0.162, height=27, relwidth=0.782)
+        self.excel_path_entry.configure(background="white")
+        self.excel_path_entry.configure(disabledforeground="#a3a3a3")
+        self.excel_path_entry.configure(font="-family {新宋体} -size 10")
+        self.excel_path_entry.configure(foreground="#000000")
+        self.excel_path_entry.configure(highlightbackground="#d9d9d9")
+        self.excel_path_entry.configure(highlightcolor="#000000")
+        self.excel_path_entry.configure(insertbackground="#000000")
+        self.excel_path_entry.configure(selectbackground="#d9d9d9")
+        self.excel_path_entry.configure(selectforeground="black")
+        self.excel_path_entry.configure(textvariable=self.excel_path)
+
+        self.excel_path_select_button = tk.Button(self.setting_tab)
+        self.excel_path_select_button.place(relx=0.843, rely=0.157, height=28, width=30)
+        self.excel_path_select_button.configure(activebackground="#d9d9d9")
+        self.excel_path_select_button.configure(activeforeground="black")
+        self.excel_path_select_button.configure(background="#d9d9d9")
+        self.excel_path_select_button.configure(disabledforeground="#a3a3a3")
+        self.excel_path_select_button.configure(foreground="#000000")
+        self.excel_path_select_button.configure(highlightbackground="#d9d9d9")
+        self.excel_path_select_button.configure(highlightcolor="#000000")
+        self.excel_path_select_button.configure(text='''选择''', command=self.select_file)
+
+    def select_folder(self):
+        logger.info("Selecting Result folder...")
+        # 打开文件夹选择对话框
+        folder_path = filedialog.askdirectory()
+        if folder_path:
+            # 如果用户选择了文件夹，将文件夹路径显示在输入框中
+            logger.info(f"Selected Result folder_path : {folder_path}")
+            self.result_path_entry.delete(0, tk.END)
+            self.result_path_entry.insert(0, folder_path)
+            self.etax_log(f'{get_current_time()} 运行结果保存路径：{folder_path}\n\n')
+            self.ptax_log(f'{get_current_time()} 运行结果保存路径：{folder_path}\n\n')
+        else:
+            logger.info('Nothing Changed.')
+
+    def select_file(self):
+        logger.info("Selecting Excel file...")
+        # 打开文件选择对话框
+        file_path = filedialog.askopenfilename()
+        if file_path:
+            # 如果用户选择了文件，将文件路径显示在输入框中
+            logger.info(f"Selected Excel file_path : {file_path}")
+            self.etax_log(f'{get_current_time()} Excel文件路径：\n{file_path}\n\n')
+            self.ptax_log(f'{get_current_time()} Excel文件路径：\n{file_path}\n\n')
+            self.excel_path_entry.delete(0, tk.END)
+            self.excel_path_entry.insert(0, file_path)
+        else:
+            logger.info('Nothing Changed.')
+
+    def etax_log(self, message):
+        self.etax_text.insert("end", message + "\n")
+        self.etax_text.see("end")
+
+    def ptax_log(self, message):
+        self.ptax_text.insert("end", message + "\n")
+        self.ptax_text.see("end")
+
+    def update_config(self):
+        logger.info('Updating config info...')
+        config.config["v_code_method"] = str(self.v_code_method.get())
+        config.config["etax_home_ps"] = self.etax_home_ps.get()
+        config.config["etax_item_ps"] = self.etax_item_ps.get()
+        config.config["invoice_inquiry_ps"] = self.invoice_inquiry_ps.get()
+        config.config["task_window_setting"] = self.task_window_setting.get()
+        config.config["declare_record_ps"] = self.declare_record_ps.get()
+        config.config["gen_result"] = self.gen_result.get()
+        config.config["status_bar_setting"] = self.status_bar_setting.get()
+        config.config["excel_path"] = str(self.excel_path.get())
+        config.config["result_dir"] = str(self.result_dir.get())
+        config.update(config.config)
+
+    def start_task(self, task):
+        logger.info("Setting Config...")
+        if task == "etax":
+            config.task = 'etax'
+            self.etax_log(f'{get_current_time()}正在更新配置信息...')
+            self.update_config()
+            # thread = threading.Thread(target=self.update_config, daemon=True)
+            # thread.start()
+            self.etax_log(f'{get_current_time()}正在创建任务...')
+            self.etax_log(f'{get_current_time()}正在运行任务...')
+        elif task == "ptax":
+            config.task = 'ptax'
+            self.ptax_log(f'{get_current_time()}正在更新配置信息...')
+            self.update_config()
+            # thread = threading.Thread(target=self.update_config, daemon=True)
+            # thread.start()
+            self.ptax_log(f'{get_current_time()}正在创建任务...')
+            self.ptax_log(f'{get_current_time()}正在启动任务，即将关闭面板...')
+        # 设置可运行标志
+        config.run = True
+        self.panel_close()
+
+    def hide_window(self):
+        # 隐藏窗口
+        self.root.withdraw()
+        # 禁用按钮
+        self.etax_start_run_button.config(state="disabled")
+        self.ptax_start_run_button.config(state="disabled")
+
+    def show_window(self):
+        # 显示窗口
+        self.root.deiconify()
+        self.root.update_idletasks()
+        # 启用按钮
+        self.etax_start_run_button.config(state="normal")
+        self.ptax_start_run_button.config(state="normal")
+
+    def on_closing(self):
+        logger.info("Panel Exit Button Clicked, Setting Abort Flag...")
+        config.abort = True
+        self.update_config()  # 更新设置
+        self.panel_close()
+        sys.exit()
+
+    def panel_close(self):
+        logger.info("Closing Panel...")
+        self.root.destroy()
+
+
+def start_panel():
+    # 启动面板
+    logger.info("Entered Panel, Starting...")
+    root = Tk()
+    panel = Panel(root)
+    logger.info("Panel mainloop Starting...")
+    root.mainloop()
+    logger.info("Panel mainloop Exited, Returning Starter...")
+
+
+if __name__ == '__main__':
+    threading.Thread(target=start_panel).start()
